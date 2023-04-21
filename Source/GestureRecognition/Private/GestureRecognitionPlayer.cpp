@@ -121,6 +121,8 @@ void AGestureRecognitionPlayer::OnActionRecordMovement()
 
 	if (bIsRecord)
 	{
+		//Cache Starting Time
+		RecordingStartTime = GetWorld()->GetTimeSeconds();
 		FString FilePath = FPaths::ProjectSavedDir() + "MotionControllerData_" + FString::FromInt(CurrentFileIndex) + ".csv";
 		FFileHelper::SaveStringToFile(CSVHeaders, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_None);
 	}
@@ -132,49 +134,51 @@ void AGestureRecognitionPlayer::OnActionRecordMovement()
 
 void AGestureRecognitionPlayer::Record()
 {
-	  // Get the current time
-        float CurrentTime = GetWorld()->GetTimeSeconds();
-        FVector RightHandPosition = GetRelativeLocation(RightHand);
-        FQuat RightHandOrientation = GetRelativeRotation(RightHand);
+	// Reset Time
+    float CurrentTime = GetWorld()->GetTimeSeconds() - RecordingStartTime;
 
-        FVector RightHandVelocity = GetControllerVelocity(SphereDetectorRight);
-        FVector RightHandAngularVelocity = GetControllerAngularVelocity(SphereDetectorRight);
+	//Get Position of Right Hand Position and Direction
+    FVector RightHandPosition = GetRelativeLocation(RightHand);
+    FQuat RightHandOrientation = GetRelativeRotation(RightHand);
 
-        FString PositionX = FString::SanitizeFloat(RightHandPosition.X);
-        FString PositionY = FString::SanitizeFloat(RightHandPosition.Y);
-        FString PositionZ = FString::SanitizeFloat(RightHandPosition.Z);
+    FVector RightHandVelocity = GetControllerVelocity(SphereDetectorRight);
+    FVector RightHandAngularVelocity = GetControllerAngularVelocity(SphereDetectorRight);
 
-        FString RotationX = FString::SanitizeFloat(RightHandOrientation.X);
-        FString RotationY = FString::SanitizeFloat(RightHandOrientation.Y);
-        FString RotationZ = FString::SanitizeFloat(RightHandOrientation.Z);
-        FString RotationW = FString::SanitizeFloat(RightHandOrientation.W);
+    FString PositionX = FString::SanitizeFloat(RightHandPosition.X);
+    FString PositionY = FString::SanitizeFloat(RightHandPosition.Y);
+    FString PositionZ = FString::SanitizeFloat(RightHandPosition.Z);
 
-        FString VelocityX = FString::SanitizeFloat(RightHandVelocity.X);
-        FString VelocityY = FString::SanitizeFloat(RightHandVelocity.Y);
-        FString VelocityZ = FString::SanitizeFloat(RightHandVelocity.Z);
+    FString RotationX = FString::SanitizeFloat(RightHandOrientation.X);
+    FString RotationY = FString::SanitizeFloat(RightHandOrientation.Y);
+    FString RotationZ = FString::SanitizeFloat(RightHandOrientation.Z);
+    FString RotationW = FString::SanitizeFloat(RightHandOrientation.W);
 
-        FString AngularVelocityX = FString::SanitizeFloat(RightHandAngularVelocity.X);
-        FString AngularVelocityY = FString::SanitizeFloat(RightHandAngularVelocity.Y);
-        FString AngularVelocityZ = FString::SanitizeFloat(RightHandAngularVelocity.Z);
+    FString VelocityX = FString::SanitizeFloat(RightHandVelocity.X);
+    FString VelocityY = FString::SanitizeFloat(RightHandVelocity.Y);
+    FString VelocityZ = FString::SanitizeFloat(RightHandVelocity.Z);
 
-        int32 NumDecimalPlaces = 4;
-        FString CurrentTimeString = FString::SanitizeFloat(CurrentTime, NumDecimalPlaces);
+    FString AngularVelocityX = FString::SanitizeFloat(RightHandAngularVelocity.X);
+    FString AngularVelocityY = FString::SanitizeFloat(RightHandAngularVelocity.Y);
+    FString AngularVelocityZ = FString::SanitizeFloat(RightHandAngularVelocity.Z);
 
-        FString CSVLine = CurrentTimeString + "," + PositionX + "," + PositionY + "," + PositionZ +
-            "," + VelocityX + "," + VelocityY + "," + VelocityZ +
-            "," + RotationX + "," + RotationY + "," + RotationZ + "," + RotationW +
-            "," + AngularVelocityX + "," + AngularVelocityY + "," + AngularVelocityZ + "\n";
+    int32 NumDecimalPlaces = 4;
+    FString CurrentTimeString = FString::SanitizeFloat(CurrentTime, NumDecimalPlaces);
 
-        FString FilePath = FPaths::ProjectSavedDir() + "MotionControllerData_" + FString::FromInt(CurrentFileIndex) + ".csv";
+    FString CSVLine = CurrentTimeString + "," + PositionX + "," + PositionY + "," + PositionZ +
+        "," + VelocityX + "," + VelocityY + "," + VelocityZ +
+        "," + RotationX + "," + RotationY + "," + RotationZ + "," + RotationW +
+        "," + AngularVelocityX + "," + AngularVelocityY + "," + AngularVelocityZ + "\n";
 
-        // Append the line of data to the CSV file
-        FFileHelper::SaveStringToFile(CSVLine, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
+    FString FilePath = FPaths::ProjectSavedDir() + "MotionControllerData_" + FString::FromInt(CurrentFileIndex) + ".csv";
 
-		UE_LOG(LogTemp, Warning,TEXT("AGestureRecognitionPlayer::Tick - Right Hand Position: %s"), *RightHandPosition.ToString());
-		UE_LOG(LogTemp, Warning,TEXT("AGestureRecognitionPlayer::Tick - Right Hand Position: X %s"), *RightHandPosition.XAxisVector.ToString());
-		UE_LOG(LogTemp, Warning,TEXT("AGestureRecognitionPlayer::Tick - Right Hand Orientation: %s"), *RightHandOrientation.ToString());
-		UE_LOG(LogTemp, Warning,TEXT("AGestureRecognitionPlayer::Tick - Right Hand Velocity: %s"), *RightHandVelocity.ToString());
-		UE_LOG(LogTemp, Warning,TEXT("AGestureRecognitionPlayer::Tick - Right Hand Angular Velocity: %s"), *RightHandAngularVelocity.ToString());
+    // Append the line of data to the CSV file
+    FFileHelper::SaveStringToFile(CSVLine, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
+
+	UE_LOG(LogTemp, Warning,TEXT("AGestureRecognitionPlayer::Tick - Right Hand Position: %s"), *RightHandPosition.ToString());
+	UE_LOG(LogTemp, Warning,TEXT("AGestureRecognitionPlayer::Tick - Right Hand Position: X %s"), *RightHandPosition.XAxisVector.ToString());
+	UE_LOG(LogTemp, Warning,TEXT("AGestureRecognitionPlayer::Tick - Right Hand Orientation: %s"), *RightHandOrientation.ToString());
+	UE_LOG(LogTemp, Warning,TEXT("AGestureRecognitionPlayer::Tick - Right Hand Velocity: %s"), *RightHandVelocity.ToString());
+	UE_LOG(LogTemp, Warning,TEXT("AGestureRecognitionPlayer::Tick - Right Hand Angular Velocity: %s"), *RightHandAngularVelocity.ToString());
 }
 
 #pragma endregion
