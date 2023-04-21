@@ -80,7 +80,17 @@ void AGestureRecognitionPlayer::BeginPlay()
 		}
 	}
 
-	FString FilePath = FPaths::ProjectSavedDir() + "MotionControllerData_" + FString::FromInt(CurrentFileIndex) + ".csv";
+
+	FString RecordingsDirectory = FPaths::ProjectDir() + "RecordingSessions/";
+
+	if (!FPlatformFileManager::Get().GetPlatformFile().DirectoryExists(*RecordingsDirectory))
+	{
+		FPlatformFileManager::Get().GetPlatformFile().CreateDirectory(*RecordingsDirectory);
+	}
+
+	
+	FString FilePath = RecordingsDirectory + "MotionControllerData_" + FString::FromInt(CurrentFileIndex) + ".csv";
+
 	if (!FPlatformFileManager::Get().GetPlatformFile().FileExists(*FilePath))
 	{
 		// If the file doesn't exist, add the headers to the CSV file
@@ -123,7 +133,7 @@ void AGestureRecognitionPlayer::OnActionRecordMovement()
 	{
 		//Cache Starting Time
 		RecordingStartTime = GetWorld()->GetTimeSeconds();
-		FString FilePath = FPaths::ProjectSavedDir() + "MotionControllerData_" + FString::FromInt(CurrentFileIndex) + ".csv";
+		FString FilePath = FPaths::ProjectDir() + "RecordingSessions/" + "MotionControllerData_" + FString::FromInt(CurrentFileIndex) + ".csv";
 		FFileHelper::SaveStringToFile(CSVHeaders, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_None);
 	}
 	else
@@ -169,7 +179,7 @@ void AGestureRecognitionPlayer::Record()
         "," + RotationX + "," + RotationY + "," + RotationZ + "," + RotationW +
         "," + AngularVelocityX + "," + AngularVelocityY + "," + AngularVelocityZ + "\n";
 
-    FString FilePath = FPaths::ProjectSavedDir() + "MotionControllerData_" + FString::FromInt(CurrentFileIndex) + ".csv";
+    FString FilePath = FPaths::ProjectDir() + "RecordingSessions/" + "MotionControllerData_" + FString::FromInt(CurrentFileIndex) + ".csv";
 
     // Append the line of data to the CSV file
     FFileHelper::SaveStringToFile(CSVLine, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
