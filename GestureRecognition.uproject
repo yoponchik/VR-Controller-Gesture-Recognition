@@ -1,13 +1,19 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.1",
+	"EngineAssociation": "5.2",
 	"Category": "",
 	"Description": "",
-	"Plugins": [
+	"Modules": [
 		{
-			"Name": "ResonanceAudio",
-			"Enabled": true
-		},
+			"Name": "GestureRecognition",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
+		}
+	],
+	"Plugins": [
 		{
 			"Name": "OpenXR",
 			"Enabled": true,
