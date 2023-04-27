@@ -110,6 +110,8 @@ void AGestureRecognitionPlayer::SetupPlayerInputComponent(UInputComponent* Playe
 	if(inputSystem){
 		//binding record button function to button press
 		inputSystem->BindAction(IA_RecordMovement, ETriggerEvent::Started, this, &AGestureRecognitionPlayer::OnActionRecordMovement);
+		inputSystem->BindAction(IA_FlagSegmentPressed, ETriggerEvent::Started, this, &AGestureRecognitionPlayer::OnActionFlagSegmentPressed);
+		inputSystem->BindAction(IA_FlagSegmentPressed, ETriggerEvent::Completed, this, &AGestureRecognitionPlayer::OnActionFlagSegmentReleased);
 	}
 }
 
@@ -151,6 +153,16 @@ void AGestureRecognitionPlayer::OnActionRecordMovement()
 	}
 }
 
+void AGestureRecognitionPlayer::OnActionFlagSegmentPressed()
+{
+	CurrentSegmentValue = FlaggedSegmentValue;
+}
+
+void AGestureRecognitionPlayer::OnActionFlagSegmentReleased()
+{
+	CurrentSegmentValue = 0;
+}
+
 //Function called in Tick
 //Extract controller data, convert to FString, and save to file
 void AGestureRecognitionPlayer::Record()
@@ -183,11 +195,15 @@ void AGestureRecognitionPlayer::Record()
     FString AngularVelocityY = FString::SanitizeFloat(RightHandAngularVelocity.Y);
     FString AngularVelocityZ = FString::SanitizeFloat(RightHandAngularVelocity.Z);
 #pragma endregion 
-	
+
+	//Current Time in float; converting it to FString
     int32 NumDecimalPlaces = 4;
     FString CurrentTimeString = FString::SanitizeFloat(CurrentTime, NumDecimalPlaces);
 
-    FString CSVLine = CurrentTimeString + "," + PositionX + "," + PositionY + "," + PositionZ +
+	//Convert Current Segment Value to FString
+	FString CurrentSegmentValueString = FString::FromInt(CurrentSegmentValue);
+	
+    FString CSVLine = CurrentTimeString + "," + CurrentSegmentValueString + "," + PositionX + "," + PositionY + "," + PositionZ +
         "," + VelocityX + "," + VelocityY + "," + VelocityZ +
         "," + RotationX + "," + RotationY + "," + RotationZ + "," + RotationW +
         "," + AngularVelocityX + "," + AngularVelocityY + "," + AngularVelocityZ + "\n";
@@ -198,6 +214,7 @@ void AGestureRecognitionPlayer::Record()
     FFileHelper::SaveStringToFile(CSVLine, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
 
 	//For Debugging, can comment out
+	UE_LOG(LogTemp, Warning, TEXT("AGestureRecognitionPlayer::Tick: %d"), CurrentSegmentValue);
 	UE_LOG(LogTemp, Warning,TEXT("AGestureRecognitionPlayer::Tick - Right Hand Position: %s"), *RightHandPosition.ToString());
 	UE_LOG(LogTemp, Warning,TEXT("AGestureRecognitionPlayer::Tick - Right Hand Position: X %s"), *RightHandPosition.XAxisVector.ToString());
 	UE_LOG(LogTemp, Warning,TEXT("AGestureRecognitionPlayer::Tick - Right Hand Orientation: %s"), *RightHandOrientation.ToString());

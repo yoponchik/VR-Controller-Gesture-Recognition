@@ -40,6 +40,8 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Player Settings | Inputs | Movement")
 	class UInputAction* IA_RecordMovement;
+	UPROPERTY(EditAnywhere, Category = "Player Settings | Inputs | Movement")
+	class UInputAction* IA_FlagSegmentPressed;
 
 #pragma endregion Input
 
@@ -64,20 +66,33 @@ public:
 	class USphereComponent* SphereDetectorLeft;
 #pragma endregion Controllers & Hands
 
-
+	//function called on record button press
 	UFUNCTION()
-	void OnActionRecordMovement();
+	void OnActionRecordMovement();				//toggles bIsRecord flag
 
+	//function called on flag segment button press
+	//toggles FlagSegmentValue
+	UFUNCTION()
+	void OnActionFlagSegmentPressed();
+	UFUNCTION()
+	void OnActionFlagSegmentReleased();
+
+	//Records controller movement
+		//Currently, only does right motion controller
 	void Record();
 
-
 	int32 CurrentFileIndex = 0;
-	FString CSVHeaders = "Time,Right Hand Position X,Right Hand Position Y,Right Hand Position Z,Right Hand Velocity X,Right Hand Velocity Y,Right Hand Velocity Z,Right Hand Orientation X,Right Hand Orientation Y,Right Hand Orientation Z,Right Hand Angular Velocity X,Right Hand Angular Velocity Y,Right Hand Angular Velocity Z,Right Hand Angular Velocity W, \n";
+	FString CSVHeaders = "Time,Relevant Segment,Right Hand Position X,Right Hand Position Y,Right Hand Position Z,Right Hand Velocity X,Right Hand Velocity Y,Right Hand Velocity Z,Right Hand Orientation X,Right Hand Orientation Y,Right Hand Orientation Z,Right Hand Angular Velocity X,Right Hand Angular Velocity Y,Right Hand Angular Velocity Z,Right Hand Angular Velocity W, \n";
 
-	
 	float RecordingStartTime = 0.0f;
-	bool bIsRecord = false;
+	bool bIsRecord = false;			
 
+	//Arbitrary, large value to help ML to detect segment
+	//Can change this value in the Unreal Engine Editor
+		//In GestureRecognitionStuff folder, BP_GestureRecognitionPlayer
+		//Search for Gesture Recognition or FlaggedSegment Value in the search bar
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Gesture Recognition")
+	int32 FlaggedSegmentValue = 1000;
 
 	//For getting controller data 
 	FVector GetRelativeLocation(UMotionControllerComponent* InMotionController);
@@ -85,7 +100,9 @@ public:
 	FVector GetControllerAngularVelocity(USphereComponent* InSphereDetector);
 	FVector GetControllerVelocity(USphereComponent* InSphereDetector);
 
-	FVector PreviousVelocity;
 
+private:
+	FVector PreviousVelocity;
+	int32 CurrentSegmentValue;
 
 };
