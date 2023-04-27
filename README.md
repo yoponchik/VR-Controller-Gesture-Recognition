@@ -2,10 +2,12 @@
 
 <h1>Step 1: Record</h1>
 
-You can toggle the record button by pressing the Right "B" button on the VR controller. 
-Press Right "B" button to stop recording. 
+You can toggle the record button by pressing the Right "B" button on the VR controller. Press Right "B" button to stop recording. 
+While recording the motion controller movements, press and hold the Right Index Trigger button during the relevant gesture. Then let go of the button when finished doing the gesture. This will essentially make it easier for people/machine to know what part of the movement is the relevant gesture.
 
-The motion controller data will be exported to CSV format and saved in the Recording Sessions Folder in the project directory. Starting a new recording sequence will create a new CSV file and number it sequentially.
+Note: Only the right motion controller is available for recording, at the moment.
+
+The motion controller data will be exported to CSV format and saved in the 'Recording Sessions' folder in the project directory. Starting a new recording sequence will create a new CSV file and number it sequentially.
 
 <h1>Step 2: Using SensiML</h1>
 
