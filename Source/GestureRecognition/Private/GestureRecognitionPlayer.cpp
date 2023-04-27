@@ -21,6 +21,7 @@ AGestureRecognitionPlayer::AGestureRecognitionPlayer()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	//Set the interval of tick
 	PrimaryActorTick.TickInterval = RECORD_FREQUENCY_SECONDS;
 	
 #pragma region VR Camera
@@ -28,7 +29,7 @@ AGestureRecognitionPlayer::AGestureRecognitionPlayer()
 	VRCamera->SetupAttachment(GetRootComponent());
 #pragma endregion VR Camera
 
-#pragma region Controllers & Hand Meshes
+#pragma region Setting Up Controllers & Hand Meshes
 	//vr Hand Controllers
 	LeftHand = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("Left Hand"));
 	RightHand = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("Right Hand"));
@@ -57,13 +58,12 @@ AGestureRecognitionPlayer::AGestureRecognitionPlayer()
 		RightHandMesh->SetSkeletalMesh(tempMesh2.Object);
 		RightHandMesh->SetRelativeLocationAndRotation(FVector(-2.981260, 3.500000, 4.561753), FRotator(25.000000, 0.000000, 89.999999));
 	}
-#pragma endregion Controllers & Hand Meshes
 
 	SphereDetectorLeft = CreateDefaultSubobject<USphereComponent>(TEXT("Left Sphere Detector"));
 	SphereDetectorLeft->SetupAttachment(LeftHand);
 	SphereDetectorRight = CreateDefaultSubobject<USphereComponent>(TEXT("Right Sphere Detector"));
 	SphereDetectorRight->SetupAttachment(RightHand);
-	
+#pragma endregion Controllers & Hand Meshes
 }
 
 // Called when the game starts or when spawned
@@ -71,6 +71,7 @@ void AGestureRecognitionPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//Add Input Mapping Context to bind controller input actions
 	PlayerController  = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
 	if(PlayerController){
 		auto localPlayer = PlayerController->GetLocalPlayer();
@@ -80,36 +81,25 @@ void AGestureRecognitionPlayer::BeginPlay()
 		}
 	}
 
-
+	//get Recording Sessions folder
 	FString RecordingsDirectory = FPaths::ProjectDir() + "RecordingSessions/";
 
+	//if the folder doesn't exist, create a new one
 	if (!FPlatformFileManager::Get().GetPlatformFile().DirectoryExists(*RecordingsDirectory))
 	{
 		FPlatformFileManager::Get().GetPlatformFile().CreateDirectory(*RecordingsDirectory);
 	}
 
-	
+	//Create a file path
 	FString FilePath = RecordingsDirectory + "MotionControllerData_" + FString::FromInt(CurrentFileIndex) + ".csv";
 
+	// If the file doesn't exist 
 	if (!FPlatformFileManager::Get().GetPlatformFile().FileExists(*FilePath))
 	{
-		// If the file doesn't exist, add the headers to the CSV file
+		//add the headers to the CSV file
 		FFileHelper::SaveStringToFile(CSVHeaders, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get());
 	}
 }
-
-// Called every frame
-void AGestureRecognitionPlayer::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	
-	 if (bIsRecord){
-	 	Record();
-	}
-	
-}
-
 
 // Called to bind functionality to input
 void AGestureRecognitionPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -118,35 +108,57 @@ void AGestureRecognitionPlayer::SetupPlayerInputComponent(UInputComponent* Playe
 
 	auto inputSystem = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 	if(inputSystem){
+		//binding record button function to button press
 		inputSystem->BindAction(IA_RecordMovement, ETriggerEvent::Started, this, &AGestureRecognitionPlayer::OnActionRecordMovement);
 	}
 }
 
+
+// Called every frame
+void AGestureRecognitionPlayer::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	//if the bIsRecord flag is up, record
+	 if (bIsRecord){
+	 	Record();
+	}
+}
+
+
+
 #pragma region Record
+//Function called when the record button is pressed
 void AGestureRecognitionPlayer::OnActionRecordMovement()
 {
-	UE_LOG(LogTemp, Warning,TEXT("AGestureRecognitionPlayer::RecordMovement"));
+	UE_LOG(LogTemp, Warning,TEXT("AGestureRecognitionPlayer::OnActionRecordMovement"));
 
+	//toggle bIsRecord flag
 	bIsRecord = !bIsRecord;
 
-	if (bIsRecord)
-	{
+	//if bIsRecord is flagged
+	if (bIsRecord){
 		//Cache Starting Time
 		RecordingStartTime = GetWorld()->GetTimeSeconds();
+		//Create new csv file, name it with number, and set CSV Headers 
 		FString FilePath = FPaths::ProjectDir() + "RecordingSessions/" + "MotionControllerData_" + FString::FromInt(CurrentFileIndex) + ".csv";
 		FFileHelper::SaveStringToFile(CSVHeaders, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_None);
 	}
-	else
-	{
+	//if bIsRecord is unflagged
+	else{
+		//Increment file number
 		CurrentFileIndex++;
 	}
 }
 
+//Function called in Tick
+//Extract controller data, convert to FString, and save to file
 void AGestureRecognitionPlayer::Record()
 {
 	// Reset Time
     float CurrentTime = GetWorld()->GetTimeSeconds() - RecordingStartTime;
 
+#pragma region Extract Controller Data
 	//Get Position of Right Hand Position and Direction
     FVector RightHandPosition = GetRelativeLocation(RightHand);
     FQuat RightHandOrientation = GetRelativeRotation(RightHand);
@@ -170,7 +182,8 @@ void AGestureRecognitionPlayer::Record()
     FString AngularVelocityX = FString::SanitizeFloat(RightHandAngularVelocity.X);
     FString AngularVelocityY = FString::SanitizeFloat(RightHandAngularVelocity.Y);
     FString AngularVelocityZ = FString::SanitizeFloat(RightHandAngularVelocity.Z);
-
+#pragma endregion 
+	
     int32 NumDecimalPlaces = 4;
     FString CurrentTimeString = FString::SanitizeFloat(CurrentTime, NumDecimalPlaces);
 
@@ -184,6 +197,7 @@ void AGestureRecognitionPlayer::Record()
     // Append the line of data to the CSV file
     FFileHelper::SaveStringToFile(CSVLine, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_Append);
 
+	//For Debugging, can comment out
 	UE_LOG(LogTemp, Warning,TEXT("AGestureRecognitionPlayer::Tick - Right Hand Position: %s"), *RightHandPosition.ToString());
 	UE_LOG(LogTemp, Warning,TEXT("AGestureRecognitionPlayer::Tick - Right Hand Position: X %s"), *RightHandPosition.XAxisVector.ToString());
 	UE_LOG(LogTemp, Warning,TEXT("AGestureRecognitionPlayer::Tick - Right Hand Orientation: %s"), *RightHandOrientation.ToString());
@@ -194,6 +208,7 @@ void AGestureRecognitionPlayer::Record()
 #pragma endregion
 
 #pragma region Extract Data
+//Extracts Controller's Transform
 FVector AGestureRecognitionPlayer::GetRelativeLocation(UMotionControllerComponent* InMotionController)
 {
 	// Get the relative transform between the motion controller and the pawn
@@ -208,6 +223,7 @@ FVector AGestureRecognitionPlayer::GetRelativeLocation(UMotionControllerComponen
 	return  RelativeLocation;
 }
 
+//Extracts Quaternion from Transform and returns Relative Rotation in Quaternion
 FQuat AGestureRecognitionPlayer::GetRelativeRotation(UMotionControllerComponent* InMotionController)
 {
 	// Get the relative transform between the motion controller and the pawn
@@ -222,6 +238,8 @@ FQuat AGestureRecognitionPlayer::GetRelativeRotation(UMotionControllerComponent*
 	return RelativeRotation;
 }
 
+
+//Converts Vector from World (Global) Vector to Local (Relative) Vector 
 FVector AGestureRecognitionPlayer::GetControllerVelocity(USphereComponent* InSphereDetector)
 {
 	FVector GlobalVelocity = InSphereDetector->GetPhysicsLinearVelocity();
@@ -234,6 +252,7 @@ FVector AGestureRecognitionPlayer::GetControllerVelocity(USphereComponent* InSph
 	return LocalVelocity;
 }
 
+//Converts Angulate Vector from World (Global) Vector to Local (Relative) Angular Vector 
 FVector AGestureRecognitionPlayer::GetControllerAngularVelocity(USphereComponent* InSphereDetector)
 {
 	FVector GlobalAngularVelocity = InSphereDetector->GetPhysicsAngularVelocityInDegrees();
