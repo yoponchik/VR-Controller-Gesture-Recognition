@@ -1,5 +1,9 @@
 # VRControllerGestureRecognition
 
+<h1>Setting Up</h1>
+Refer to "Getting Started.pdf" for instructions for setting up.
+
+
 <h1>Step 1: Record</h1>
 
 You can toggle the record button by pressing the Right "B" button on the VR controller. Press Right "B" button to stop recording. 
