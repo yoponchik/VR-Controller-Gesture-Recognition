@@ -2,18 +2,22 @@
 
 
 #include "GestureRecognitionPlayer.h"
-
+#include "EngineUtils.h"
 #include "MotionControllerComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
+#include "RecordStateIndicatorWidget.h"
+#include "Components/Image.h"
 #include "Components/SphereComponent.h"
 #include "Math/UnitConversion.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "HAL/PlatformFilemanager.h"
 #include "GenericPlatform/GenericPlatformFile.h"
+#include "Haptics/HapticFeedbackEffect_Curve.h"
+#include "Components/TextBlock.h"
 
 // Sets default values
 AGestureRecognitionPlayer::AGestureRecognitionPlayer()
@@ -66,6 +70,7 @@ AGestureRecognitionPlayer::AGestureRecognitionPlayer()
 #pragma endregion Controllers & Hand Meshes
 }
 
+
 // Called when the game starts or when spawned
 void AGestureRecognitionPlayer::BeginPlay()
 {
@@ -85,8 +90,7 @@ void AGestureRecognitionPlayer::BeginPlay()
 	FString RecordingsDirectory = FPaths::ProjectDir() + "RecordingSessions/";
 
 	//if the folder doesn't exist, create a new one
-	if (!FPlatformFileManager::Get().GetPlatformFile().DirectoryExists(*RecordingsDirectory))
-	{
+	if (!FPlatformFileManager::Get().GetPlatformFile().DirectoryExists(*RecordingsDirectory)){
 		FPlatformFileManager::Get().GetPlatformFile().CreateDirectory(*RecordingsDirectory);
 	}
 
@@ -94,11 +98,11 @@ void AGestureRecognitionPlayer::BeginPlay()
 	FString FilePath = RecordingsDirectory + "MotionControllerData_" + FString::FromInt(CurrentFileIndex) + ".csv";
 
 	// If the file doesn't exist 
-	if (!FPlatformFileManager::Get().GetPlatformFile().FileExists(*FilePath))
-	{
+	if (!FPlatformFileManager::Get().GetPlatformFile().FileExists(*FilePath)){
 		//add the headers to the CSV file
 		FFileHelper::SaveStringToFile(CSVHeaders, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get());
 	}
+
 }
 
 // Called to bind functionality to input
@@ -124,7 +128,19 @@ void AGestureRecognitionPlayer::Tick(float DeltaTime)
 	//if the bIsRecord flag is up, record
 	 if (bIsRecord){
 	 	Record();
-	}
+
+	 	//Play haptic feedback
+	 	if(PlayerController){
+	 		PlayerController->PlayHapticEffect(HF_RecordIndicator, EControllerHand::Right);
+	 	}
+	 }
+	//if bIsRecord is unflagged
+	 else{
+	 	//stop haptic feedback
+	 	if(PlayerController){
+	 		PlayerController->StopHapticEffect(EControllerHand::Right);
+	 	}
+	 }
 }
 
 
@@ -151,6 +167,9 @@ void AGestureRecognitionPlayer::OnActionRecordMovement()
 		//Increment file number
 		CurrentFileIndex++;
 	}
+
+	//Delegate broadcast bIsRecord State to Widget everytime the button is pressed
+	OnWidgetTextChange.Broadcast(this->bIsRecord);
 }
 
 void AGestureRecognitionPlayer::OnActionFlagSegmentPressed()

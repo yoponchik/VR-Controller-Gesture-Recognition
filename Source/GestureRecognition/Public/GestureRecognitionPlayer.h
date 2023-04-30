@@ -8,6 +8,9 @@
 #include "InputMappingContext.h"
 #include "GestureRecognitionPlayer.generated.h"
 
+//Delegate to change text in widget
+	//Simpler with delegate because otherwise need Widget actor ref then Widget component ref
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWidgetTextChange, bool, bIsRecord);
 
 const FString FILENAME = TEXT("MotionControllerData.csv");
 
@@ -20,6 +23,7 @@ public:
 	// Sets default values for this character's properties
 	AGestureRecognitionPlayer();
 
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -31,9 +35,6 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY()
-	class APlayerController* PlayerController;
-	
 #pragma region Input
 	UPROPERTY(EditAnywhere, Category = "Player Settings | Inputs | Movement")
 	class UInputMappingContext* IMC_VRInput;
@@ -84,8 +85,9 @@ public:
 	int32 CurrentFileIndex = 0;
 	FString CSVHeaders = "Time,Relevant Segment,Right Hand Position X,Right Hand Position Y,Right Hand Position Z,Right Hand Velocity X,Right Hand Velocity Y,Right Hand Velocity Z,Right Hand Orientation X,Right Hand Orientation Y,Right Hand Orientation Z,Right Hand Angular Velocity X,Right Hand Angular Velocity Y,Right Hand Angular Velocity Z,Right Hand Angular Velocity W\n";
 
- UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="Record Settings")
- float RecordSampleRateSeconds = 0.01f;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="Gesture Recognition")
+	float RecordSampleRateSeconds = 0.01f;
+
 	float RecordingStartTime = 0.0f;
 	bool bIsRecord = false;			
 
@@ -102,9 +104,18 @@ public:
 	FVector GetControllerAngularVelocity(USphereComponent* InSphereDetector);
 	FVector GetControllerVelocity(USphereComponent* InSphereDetector);
 
+	//Record State Indication
+	//Haptic Feedback
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Gesture Recognition")
+	class UHapticFeedbackEffect_Curve* HF_RecordIndicator;
+
+	//widget text change
+	FOnWidgetTextChange OnWidgetTextChange;
 
 private:
 	FVector PreviousVelocity;
 	int32 CurrentSegmentValue;
-
+	
+	UPROPERTY()
+	class APlayerController* PlayerController;
 };
