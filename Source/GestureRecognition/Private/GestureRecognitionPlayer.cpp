@@ -22,7 +22,7 @@ AGestureRecognitionPlayer::AGestureRecognitionPlayer()
 	PrimaryActorTick.bCanEverTick = true;
 
 	//Set the interval of tick
-	PrimaryActorTick.TickInterval = RECORD_FREQUENCY_SECONDS;
+	PrimaryActorTick.TickInterval = RecordSampleRateSeconds;
 	
 #pragma region VR Camera
 	VRCamera = CreateDefaultSubobject<UCameraComponent>("Camera Component");
