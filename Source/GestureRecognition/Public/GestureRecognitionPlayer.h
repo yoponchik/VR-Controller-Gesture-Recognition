@@ -82,7 +82,7 @@ public:
 	void Record();
 
 	int32 CurrentFileIndex = 0;
-	FString CSVHeaders = "Time,Relevant Segment,Right Hand Position X,Right Hand Position Y,Right Hand Position Z,Right Hand Velocity X,Right Hand Velocity Y,Right Hand Velocity Z,Right Hand Orientation X,Right Hand Orientation Y,Right Hand Orientation Z,Right Hand Angular Velocity X,Right Hand Angular Velocity Y,Right Hand Angular Velocity Z,Right Hand Angular Velocity W, \n";
+	FString CSVHeaders = "Time,Relevant Segment,Right Hand Position X,Right Hand Position Y,Right Hand Position Z,Right Hand Velocity X,Right Hand Velocity Y,Right Hand Velocity Z,Right Hand Orientation X,Right Hand Orientation Y,Right Hand Orientation Z,Right Hand Angular Velocity X,Right Hand Angular Velocity Y,Right Hand Angular Velocity Z,Right Hand Angular Velocity W\n";
 
 	float RecordingStartTime = 0.0f;
 	bool bIsRecord = false;			
