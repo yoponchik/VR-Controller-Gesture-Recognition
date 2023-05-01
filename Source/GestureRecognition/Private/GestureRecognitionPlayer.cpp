@@ -128,16 +128,16 @@ void AGestureRecognitionPlayer::Tick(float DeltaTime)
 	//if the bIsRecord flag is up, record
 	 if (bIsRecord){
 	 	Record();
-
+	 	
 	 	//Play haptic feedback
-	 	if(PlayerController){
+	 	if(PlayerController && bDoingGesture){
 	 		PlayerController->PlayHapticEffect(HF_RecordIndicator, EControllerHand::Right);
 	 	}
 	 }
 	//if bIsRecord is unflagged
 	 else{
 	 	//stop haptic feedback
-	 	if(PlayerController){
+	 	if(PlayerController && !bDoingGesture){
 	 		PlayerController->StopHapticEffect(EControllerHand::Right);
 	 	}
 	 }
@@ -175,11 +175,20 @@ void AGestureRecognitionPlayer::OnActionRecordMovement()
 void AGestureRecognitionPlayer::OnActionFlagSegmentPressed()
 {
 	CurrentSegmentValue = FlaggedSegmentValue;
+
+	//flag bDoingGesture
+	bDoingGesture = true;
+
 }
 
 void AGestureRecognitionPlayer::OnActionFlagSegmentReleased()
 {
 	CurrentSegmentValue = 0;
+
+	//unflag bDoingGesture
+	bDoingGesture = false;
+	
+
 }
 
 //Function called in Tick

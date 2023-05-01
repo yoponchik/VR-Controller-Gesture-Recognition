@@ -34,7 +34,7 @@ void URecordStateIndicatorWidget::ChangeText(bool bIsRecord)
 	}
 	else{
 		ImageRecordIndicator->SetVisibility(ESlateVisibility::Visible);
-		TextRecordIndicator->SetText(FText::FromString("Not Recording"));
+		TextRecordIndicator->SetText(FText::FromString("Recording"));
 		TextSubtext->SetText(FText::FromString("Press Right 'B' Button Again To STOP Recording."));
 	}
 

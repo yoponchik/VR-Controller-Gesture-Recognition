@@ -88,8 +88,12 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="Gesture Recognition")
 	float RecordSampleRateSeconds = 0.01f;
 
+	//Checkpoint in case user wants multiple recording sessions in single runtime
 	float RecordingStartTime = 0.0f;
-	bool bIsRecord = false;			
+	
+	bool bIsRecord = false;
+
+	bool bDoingGesture = false;
 
 	//Arbitrary, large value to help ML to detect segment
 	//Can change this value in the Unreal Engine Editor
