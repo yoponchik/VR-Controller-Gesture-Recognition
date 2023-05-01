@@ -3,7 +3,7 @@ import os
 import obsws_python as obs
 
 try:
-    cl = obs.ReqClient(host="localhost", port=4455, password="")
+    cl = obs.ReqClient(host="localhost", port=4455, password="sensiml")
 except Exception as e:
     print(
         "Unable to connect to OBS Websockets. Make sure that OBS Studio is running > v28 and the webserver is enabled."
@@ -12,11 +12,12 @@ except Exception as e:
 
 RECORD_DIR = os.path.join(os.path.dirname(__file__), "../", "RecordingSessions")  # r""
 REFRESH_RATE = 0.25
+OBS_DELAY_TIME = 2
 
 print("Connected to OBS Studio Websockets API")
 
 outputs = cl.get_output_list()
-print("Available Outputs", outputs)
+print("Available Outputs", outputs.outputs)
 
 default_output_name = "simple_file_output"
 print("Setting default output:", default_output_name)
@@ -51,6 +52,8 @@ while True:
 
     file_size = 0
     current_file_size = os.path.getsize(os.path.join(RECORD_DIR, new_file))
+
+    time.sleep(OBS_DELAY_TIME)
 
     while file_size != current_file_size:
 
