@@ -83,7 +83,7 @@ public:
 	void Record();
 
 	int32 CurrentFileIndex = 0;
-	FString CSVHeaders = "Time,Relevant Segment,Right Hand Position X,Right Hand Position Y,Right Hand Position Z,Right Hand Velocity X,Right Hand Velocity Y,Right Hand Velocity Z,Right Hand Orientation X,Right Hand Orientation Y,Right Hand Orientation Z,Right Hand Angular Velocity X,Right Hand Angular Velocity Y,Right Hand Angular Velocity Z,Right Hand Angular Velocity W\n";
+	FString CSVHeaders = "Time,Relevant Segment,RH_Relative_Position_X,RH_Relative_Position_Y,RH_Relative_Position_Z,RH_Velocity_X,RH_Velocity_Y,RH_Velocity_Z,RH_Rotation_X,RH_Rotation_YRH_Rotation_Z,RH_Rotation_W,RH_Angular_Velocity_X,RH_Angular_Velocity_Y,RH_Angular_Velocity_Z\n";
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category="Gesture Recognition")
 	float RecordSampleRateSeconds = 0.01f;
