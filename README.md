@@ -3,7 +3,6 @@
 <h1>Setting Up</h1>
 Refer to "Getting Started.pdf" for instructions for setting up.
 
-
 <h1>Step 1: Record</h1>
 
 You can toggle the record button by pressing the Right "B" button on the VR controller. Press Right "B" button to stop recording. 
@@ -26,3 +25,7 @@ The motion controller data will be exported to CSV format and saved in the 'Reco
 <h2>Open Project<h2>
   
 ![OpenProject](https://user-images.githubusercontent.com/57009810/233537691-8087e8f6-f7a5-462f-bd57-76f14aefa882.png)
+
+- Download the Data Lab Capture software
+  https://sensiml.cloud/downloads/
+
